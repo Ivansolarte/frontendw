@@ -23,9 +23,6 @@ function App() {
 
   return (
     <div>
-      {/* <Header/>
-    <ProductHome/> */}
-    {JSON.stringify(isAuthenticated)}
       {isAuthenticated ? <HomeRouters/> : <AuthRouters/>}
     </div>
   );

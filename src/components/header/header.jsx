@@ -7,6 +7,10 @@ export const Header = () => {
     const dispatch = useDispatch();
   const [menuMobil, setMenuMobil] = useState(false);
   const [menuDesktop, setMenuDesktop] = useState(false);
+  const sessionClose = () =>{
+    dispatch( logout() )
+    sessionStorage.clear()
+  }
   return (
     <>
       <nav class="bg-gray-800">
@@ -140,7 +144,7 @@ export const Header = () => {
                   >
                    
                     <p
-                       onClick={() => dispatch( logout() )}
+                       onClick={sessionClose}
                       class="block px-4 py-2 text-sm text-gray-700"
                       role="menuitem"
                       tabindex="-1"
