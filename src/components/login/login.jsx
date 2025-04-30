@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/slices/authSlice";
 import { authLogin } from "../../services/loginService";
 import { handleChange } from "../../utils/handlerForm";
+import { Loading } from "../modals/loading";
 
 export const Login = () => {
   const { form, handleChangeText } = handleChange({
@@ -9,38 +11,45 @@ export const Login = () => {
     password: "",
   });
   const dispatch = useDispatch();
+  const [stateLoading, setStateLoading] = useState(false);
+  const onsubmit = () => {
+    const { email, password } = form;
 
-const onsubmit = () => {
-  const { email, password } = form;
+    // Validar que los campos no estén vacíos
+    if (!email.trim() || !password.trim()) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
 
-  // Validar que los campos no estén vacíos
-  if (!email.trim() || !password.trim()) {
-    alert("Por favor, completa todos los campos.");
-    return;
-  }
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Por favor, ingresa un correo electrónico válido.");
+      return;
+    }
 
-  // Validar formato de email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    alert("Por favor, ingresa un correo electrónico válido.");
-    return;
-  }
-
-  // Si todo está bien, proceder con el login
-  authLogin(form)
-    .then((resp) => {
-      if (resp.token?.access_token) {
-        sessionStorage.setItem("token", JSON.stringify(`Bearer ${resp.token.access_token}`));
-        dispatch(login());
-      } else {
-        alert("Login fallido: no se recibió el token.");
-      }
-    })
-    .catch((err) => {
-      alert("Error en login. Verifica tus credenciales.");
-      console.error("Error en login:", err);
-    });
-};
+    // Si todo está bien, proceder con el login
+    setStateLoading(true);
+    authLogin(form)
+      .then((resp) => {
+        if (resp.token?.access_token) {
+          sessionStorage.setItem(
+            "token",
+            JSON.stringify(`Bearer ${resp.token.access_token}`)
+          );
+          setStateLoading(false);
+          dispatch(login());
+        } else {
+          setStateLoading(false);
+          alert("Login fallido: no se recibió el token.");
+        }
+      })
+      .catch((err) => {
+        setStateLoading(false);
+        alert("Error en login. Verifica tus credenciales.");
+        console.error("Error en login:", err);
+      });
+  };
 
   return (
     <>
@@ -63,7 +72,7 @@ const onsubmit = () => {
                 for="email"
                 class="block text-sm/6 font-medium text-gray-900"
               >
-               Correo electrónico
+                Correo electrónico
               </label>
               <div class="mt-2">
                 <input
@@ -84,7 +93,7 @@ const onsubmit = () => {
                   for="password"
                   class="block text-sm/6 font-medium text-gray-900"
                 >
-                 Contraseña
+                  Contraseña
                 </label>
               </div>
               <div class="mt-2">
@@ -99,6 +108,7 @@ const onsubmit = () => {
                 />
               </div>
             </div>
+            {stateLoading && <Loading />}
 
             <div>
               <button

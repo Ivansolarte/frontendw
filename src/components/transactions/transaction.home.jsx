@@ -1,7 +1,8 @@
-import React from "react";
+import { useState } from "react";
 import { Modal } from "../element/modal";
 import { handleChange } from "../../utils/handlerForm";
 import { createTransaction } from "../../services/transactionService";
+import { Loading } from "../modals/loading";
 
 export const TransactionHome = ({ closeModal, dataRow }) => {
   const { form, handleChangeText, setForm } = handleChange({
@@ -30,6 +31,7 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
     },
     signature: "",
   });
+  const [stateLoading, setStateLoading] = useState(false);
 
   const formatExpiration = (input) => {
     let raw = input.replace(/\D/g, "");
@@ -110,7 +112,7 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
     }
 
     const signature = await generateSignature(form);
-
+    setStateLoading(true);
     getAcceptanceToken().then((resp) => {
       form.acceptance_token = resp.data.presigned_acceptance.acceptance_token;
       form.signature = signature;
@@ -118,157 +120,164 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
       createTransaction(form).then((resp) => {
         console.log(resp);
         if (resp.data) {
-          alert('transferencia exitosa')
-          closeModal(false)          
+          alert("transferencia exitosa");
+          setStateLoading(false);
+          closeModal(false);
         }
         if (resp.error.messages.payment_method) {
-         return alert("ocurrio un erro con el token de wompi")
+          alert("ocurrio un erro con el token de wompi");
+          setStateLoading(false);
+          return;
         }
         if (resp.error.messages.reference) {
-         return alert("La referencia ya ha sido usada debe de crear otro producto")
+          alert("La referencia ya ha sido usada debe de crear otro producto");
+          setStateLoading(false);
+          return;
         }
       });
     });
   };
 
   return (
-    <Modal>
-      <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-        <div className="sm:flex sm:items-start">
-          <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
-              Datos para el pago
-            </h3>
+    <>
+      <Modal>
+        <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div className="sm:flex sm:items-start">
+            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">
+                Datos para el pago
+              </h3>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Nombre del Cliente
-                </label>
-                <input
-                  value={form.customerName}
-                  name="customerName"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="Juan Pérez"
-                />
-              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Nombre del Cliente
+                  </label>
+                  <input
+                    value={form.customerName}
+                    name="customerName"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="Juan Pérez"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Dirección del Cliente
-                </label>
-                <input
-                  value={form.customerAddress}
-                  name="customerAddress"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="Calle 123 #45-67"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Dirección del Cliente
+                  </label>
+                  <input
+                    value={form.customerAddress}
+                    name="customerAddress"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="Calle 123 #45-67"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Número de Tarjeta
-                </label>
-                <input
-                  value={form.cardNumber}
-                  name="cardNumber"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="1234567890123456"
-                  maxLength={'16'}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Número de Tarjeta
+                  </label>
+                  <input
+                    value={form.cardNumber}
+                    name="cardNumber"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="1234567890123456"
+                    maxLength={"16"}
+                  />
+                </div>
 
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Fecha de Expiración (MM/YY)
+                  </label>
+                  <input
+                    value={form.expirationDate}
+                    name="expirationDate"
+                    onChange={(e) => {
+                      const formatted = formatExpiration(e.target.value);
+                      setForm((prev) => ({
+                        ...prev,
+                        expirationDate: formatted,
+                      }));
+                    }}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="MM/YY"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Fecha de Expiración (MM/YY)
-                </label>
-                <input
-                  value={form.expirationDate}
-                  name="expirationDate"
-                  onChange={(e) => {
-                    const formatted = formatExpiration(e.target.value);
-                    setForm((prev) => ({
-                      ...prev,
-                      expirationDate: formatted,
-                    }));
-                  }}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="MM/YY"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    CVV
+                  </label>
+                  <input
+                    value={form.cvv}
+                    name="cvv"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="123"
+                    maxLength={"3"}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  CVV
-                </label>
-                <input
-                  value={form.cvv}
-                  name="cvv"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="123"
-                  maxLength={"3"}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    value={form.email}
+                    name="email"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Correo Electrónico
-                </label>
-                <input
-                  value={form.email}
-                  name="email"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="correo@ejemplo.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Teléfono
-                </label>
-                <input
-                  value={form.phone_number}
-                  name="phone_number"
-                  onChange={handleChangeText}
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="3001234567"
-                  maxLength={"10"}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Teléfono
+                  </label>
+                  <input
+                    value={form.phone_number}
+                    name="phone_number"
+                    onChange={handleChangeText}
+                    type="text"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
+                    placeholder="3001234567"
+                    maxLength={"10"}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-        <button
-          onClick={onsubmit}
-          type="button"
-          className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
-        >
-          Pagar
-        </button>
-        <button
-          onClick={() => closeModal(false)}
-          type="button"
-          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-        >
-          Cancelar
-        </button>
-      </div>
-    </Modal>
+        <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+          <button
+            onClick={onsubmit}
+            type="button"
+            className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+          >
+            Pagar
+          </button>
+          <button
+            onClick={() => closeModal(false)}
+            type="button"
+            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+          >
+            Cancelar
+          </button>
+        </div>
+      </Modal>
+      {stateLoading && <Loading />}
+    </>
   );
 };

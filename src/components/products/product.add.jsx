@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { handleChange } from "../../utils/handlerForm";
 import { createProduct } from "../../services/productService";
+import { Loading } from "../modals/loading";
 
 export const ProductAdd = () => {
   const navigate = useNavigate();
@@ -10,7 +12,7 @@ export const ProductAdd = () => {
     price: 0,
     stock: 0,
   });
-
+  const [stateLoading, setStateLoading] = useState(false);
   const handleSubmit = () => {
     const { name, description, price, stock } = form;
 
@@ -28,9 +30,10 @@ export const ProductAdd = () => {
       alert("Las existencias deben ser un número igual o mayor que 0.");
       return;
     }
-
+    setStateLoading(true);
     createProduct(form).then((resp) => {
       if (resp) {
+        setStateLoading(false);
         navigate("/");
       }
     });
@@ -72,7 +75,7 @@ export const ProductAdd = () => {
           className="w-full px-4 py-2 border rounded"
           required
           min="0"
-          maxLength={'6'}
+          maxLength={"6"}
         />
       </div>
 
@@ -96,6 +99,7 @@ export const ProductAdd = () => {
       >
         Guardar Producto
       </button>
+      {stateLoading && <Loading />}
     </div>
   );
 };

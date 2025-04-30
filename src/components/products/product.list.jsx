@@ -6,13 +6,14 @@ import { handleChange } from "../../utils/handlerForm";
 import { Table } from "../element/table/table";
 import WompiButton from "../wompi/WompiButton";
 import { TransactionHome } from "../transactions/transaction.home";
+import { Loading } from "../modals/loading";
 
 export const ProductList = () => {
   const [arrayProducts, setArrayProducts] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [openSummary, setOpenSummary] = useState(false);
   const [objectSelected, setObjectSelected] = useState({});
-
+  const [stateLoading, setStateLoading] = useState(false)
   const [datasignature, setDatasignature] = useState("");
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
@@ -31,8 +32,10 @@ export const ProductList = () => {
   });
 
   const getInf = () => {
+    setStateLoading(true)
     getProducts().then((resp) => {
       setArrayProducts(resp);
+      setStateLoading(false)
     });
   };
 
@@ -207,6 +210,7 @@ export const ProductList = () => {
   return (
     <div className="mx-10 px-8">
       <Table arrayProducts={arrayProducts} pay={pay} />
+      {stateLoading&<Loading/>}
       {openModal && (
         <TransactionHome
           closeModal={setOpenModal}
