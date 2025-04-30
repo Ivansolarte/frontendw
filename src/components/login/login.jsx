@@ -11,31 +11,48 @@ export const Login = () => {
   const dispatch = useDispatch();
 
 const onsubmit = () => {
-  authLogin(form).then((resp) => {
-    console.log(resp.token);
-    console.log( resp.token.access_token);
-    if (resp.token.access_token) {
-      sessionStorage.setItem("token", JSON.stringify( `Bearer ${resp.token.access_token}`));
-      dispatch(login());
-    } else {
-      console.error("Login fallido: no se recibió el token.");
-    }
-  }).catch((err) => {
-    console.error("Error en login:", err);
-  });
+  const { email, password } = form;
+
+  // Validar que los campos no estén vacíos
+  if (!email.trim() || !password.trim()) {
+    alert("Por favor, completa todos los campos.");
+    return;
+  }
+
+  // Validar formato de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert("Por favor, ingresa un correo electrónico válido.");
+    return;
+  }
+
+  // Si todo está bien, proceder con el login
+  authLogin(form)
+    .then((resp) => {
+      if (resp.token?.access_token) {
+        sessionStorage.setItem("token", JSON.stringify(`Bearer ${resp.token.access_token}`));
+        dispatch(login());
+      } else {
+        alert("Login fallido: no se recibió el token.");
+      }
+    })
+    .catch((err) => {
+      alert("Error en login. Verifica tus credenciales.");
+      console.error("Error en login:", err);
+    });
 };
 
   return (
     <>
-      <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+      <div class="flex h-screen flex-col justify-center px-6 py-12 lg:px-8 ">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             class="mx-auto h-10 w-auto"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+            src="https://png.pngtree.com/png-clipart/20230819/original/pngtree-credit-money-bank-icon-picture-image_8064496.png"
             alt="Your Company"
           />
           <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-            Sign in to your account
+            Iniciar session
           </h2>
         </div>
 
@@ -46,7 +63,7 @@ const onsubmit = () => {
                 for="email"
                 class="block text-sm/6 font-medium text-gray-900"
               >
-                Email address
+               Correo electrónico
               </label>
               <div class="mt-2">
                 <input
@@ -56,7 +73,7 @@ const onsubmit = () => {
                   name="email"
                   id="email"
                   autocomplete="off"
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  class="block w-full border rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
             </div>
@@ -67,7 +84,7 @@ const onsubmit = () => {
                   for="password"
                   class="block text-sm/6 font-medium text-gray-900"
                 >
-                  Password
+                 Contraseña
                 </label>
               </div>
               <div class="mt-2">
@@ -78,7 +95,7 @@ const onsubmit = () => {
                   name="password"
                   id="password"
                   autocomplete="off"
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  class="block w-full border rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
             </div>
@@ -89,7 +106,7 @@ const onsubmit = () => {
                 type="button"
                 class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                Sign in
+                enviar
               </button>
             </div>
           </div>

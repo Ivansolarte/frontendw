@@ -1,6 +1,6 @@
 // src/services/transactionService.js
 
-const BASE_URL = "https://backendw-fls8.onrender.com";
+import { BASE_URL } from "../config/config";
 
 export async function createTransaction(payload) {
   const response = await fetch(`${BASE_URL}/transaction`, {

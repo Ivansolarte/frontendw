@@ -3,25 +3,40 @@ import { handleChange } from "../../utils/handlerForm";
 import { createProduct } from "../../services/productService";
 
 export const ProductAdd = () => {
-    const navigate = useNavigate()
-  const { form, handleChangeText ,handleChangeParsedNum} = handleChange({
+  const navigate = useNavigate();
+  const { form, handleChangeText, handleChangeParsedNum } = handleChange({
     name: "",
     description: "",
     price: 0,
     stock: 0,
   });
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Datos a enviar al backend:", form);
-    createProduct(form).then((resp)=>{
-        if (resp) {
-            navigate('/')            
-        }
-    })
-    // fetch o axios para enviar a tu endpoint
+
+  const handleSubmit = () => {
+    const { name, description, price, stock } = form;
+
+    if (!name.trim() || !description.trim()) {
+      alert("Por favor, completa todos los campos de texto.");
+      return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+      alert("El precio debe ser un número mayor que 0.");
+      return;
+    }
+
+    if (isNaN(stock) || stock < 0) {
+      alert("Las existencias deben ser un número igual o mayor que 0.");
+      return;
+    }
+
+    createProduct(form).then((resp) => {
+      if (resp) {
+        navigate("/");
+      }
+    });
   };
   return (
-    <div className="max-w-md mx-auto bg-white shadow-md rounded p-6 space-y-4">
+    <div className="max-w-md mx-auto bg-white shadow-md rounded p-6 space-y-4 border">
       <h2 className="text-2xl font-bold mb-4 text-center">Crear Producto</h2>
 
       <div>
@@ -57,6 +72,7 @@ export const ProductAdd = () => {
           className="w-full px-4 py-2 border rounded"
           required
           min="0"
+          maxLength={'6'}
         />
       </div>
 

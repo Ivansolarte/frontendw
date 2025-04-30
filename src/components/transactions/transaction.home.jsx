@@ -3,19 +3,19 @@ import { Modal } from "../element/modal";
 import { handleChange } from "../../utils/handlerForm";
 import { createTransaction } from "../../services/transactionService";
 
-export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
+export const TransactionHome = ({ closeModal, dataRow }) => {
   const { form, handleChangeText, setForm } = handleChange({
-    customerName: "ivan solarte",
-    customerAddress: "Calle 123",
+    customerName: "", //formulario
+    customerAddress: "", //formulario
     productId: dataRow.id,
     quantity: dataRow.stock,
     status: "PENDING",
 
-    cardNumber: "4242424242424242",
-    expirationDate: "12/29",
-    cvv: "123",
-    email: "test@example.com",
-    phone_number: "3001234567",
+    cardNumber: "4242424242424242", //formulario
+    expirationDate: "", //formulario
+    cvv: "", //formulario
+    email: "", //formulario
+    phone_number: "", //formulario
 
     amount_in_cents: dataRow.price,
     currency: "COP",
@@ -47,15 +47,12 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
   };
 
   const generateSignature = async (data) => {
-    console.log({data});
-    
     const privateKey = "stagtest_integrity_nAIBuqayW70XpUqJS4qf4STYiISd89Fp";
     // const stringToHash = `${data.reference}${data.amount_in_cents}${data.currency}${data.expires_at}${privateKey}`;
     const cleanReference = data.reference.replace(/[^a-zA-Z0-9]/g, "");
-    const amount_in_cents = Math.round(data.amount_in_cents * 100)
+    const amount_in_cents = Math.round(data.amount_in_cents * 100);
     const stringToHash = `${cleanReference}${amount_in_cents}${data.currency}${privateKey}`;
-    console.log(stringToHash);
-    
+
     const encodedText = new TextEncoder().encode(stringToHash);
     const hashBuffer = await window.crypto.subtle.digest(
       "SHA-256",
@@ -69,15 +66,67 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
   };
 
   const onsubmit = async () => {
+    // 1. Verificación de campos obligatorios (los campos con //formulario)
+    const requiredFields = [
+      { name: "customerName", label: "Nombre del Cliente" },
+      { name: "customerAddress", label: "Dirección del Cliente" },
+      { name: "cardNumber", label: "Número de tarjeta" },
+      { name: "expirationDate", label: "Fecha de expiración" },
+      { name: "cvv", label: "CVV" },
+      { name: "email", label: "Correo electrónico" },
+      { name: "phone_number", label: "Número de teléfono" },
+    ];
+
+    // Recorremos los campos obligatorios
+    for (let field of requiredFields) {
+      const value = form[field.name];
+      if (!value || value.trim() === "") {
+        alert(`El campo ${field.label} es obligatorio.`);
+        return; // Detenemos el envío si algún campo está vacío
+      }
+    }
+
+    // 2. Validación de los campos con restricciones (como el formato del email, CVV, etc.)
+    // Validación de Email
+    const email = form.email;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(email)) {
+      alert("El formato del correo electrónico es incorrecto.");
+      return; // Detener el envío del formulario
+    }
+
+    // Validación de CVV (3 dígitos numéricos)
+    const cvv = form.cvv;
+    if (!/^\d{3}$/.test(cvv)) {
+      alert("El CVV debe ser un número de 3 dígitos.");
+      return; // Detener el envío del formulario
+    }
+
+    // Validación de número de tarjeta (solo dígitos, longitud 16)
+    const cardNumber = form.cardNumber;
+    if (!/^\d{16}$/.test(cardNumber)) {
+      alert("El número de tarjeta debe contener 16 dígitos.");
+      return; // Detener el envío del formulario
+    }
+
     const signature = await generateSignature(form);
-  console.log({signature});
-  
+
     getAcceptanceToken().then((resp) => {
-      console.log(resp.data.presigned_acceptance.acceptance_token);
       form.acceptance_token = resp.data.presigned_acceptance.acceptance_token;
       form.signature = signature;
+      console.log(form);
       createTransaction(form).then((resp) => {
         console.log(resp);
+        if (resp.data) {
+          alert('transferencia exitosa')
+          closeModal(false)          
+        }
+        if (resp.error.messages.payment_method) {
+         return alert("ocurrio un erro con el token de wompi")
+        }
+        if (resp.error.messages.reference) {
+         return alert("La referencia ya ha sido usada debe de crear otro producto")
+        }
       });
     });
   };
@@ -91,9 +140,7 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
               Datos para el pago
             </h3>
 
-            {/* Formulario */}
             <div className="space-y-4">
-              {/* Nombre */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Nombre del Cliente
@@ -108,7 +155,6 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                 />
               </div>
 
-              {/* Dirección */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Dirección del Cliente
@@ -123,7 +169,6 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                 />
               </div>
 
-              {/* Número de tarjeta */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Número de Tarjeta
@@ -134,11 +179,12 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                   onChange={handleChangeText}
                   type="text"
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
-                  placeholder="1234 5678 9012 3456"
+                  placeholder="1234567890123456"
+                  maxLength={'16'}
+
                 />
               </div>
 
-              {/* Fecha de expiración */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Fecha de Expiración (MM/YY)
@@ -159,7 +205,6 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                 />
               </div>
 
-              {/* CVV */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   CVV
@@ -171,10 +216,10 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                   type="text"
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
                   placeholder="123"
+                  maxLength={"3"}
                 />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Correo Electrónico
@@ -183,13 +228,12 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                   value={form.email}
                   name="email"
                   onChange={handleChangeText}
-                  type="email"
+                  type="text"
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
                   placeholder="correo@ejemplo.com"
                 />
               </div>
 
-              {/* Teléfono */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Teléfono
@@ -201,6 +245,7 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
                   type="text"
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 sm:text-sm"
                   placeholder="3001234567"
+                  maxLength={"10"}
                 />
               </div>
             </div>
@@ -208,7 +253,6 @@ export const TransactionHome = ({ closeModal, setOpenModal, dataRow }) => {
         </div>
       </div>
 
-      {/* Botones */}
       <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
         <button
           onClick={onsubmit}
