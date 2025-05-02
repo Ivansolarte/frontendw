@@ -1,25 +1,23 @@
 import React from "react";
-import { Modal } from "../element/modal";
-
 export const Loading = () => {
   return (
     <div
-      class="relative z-50"
+      className="relative z-50"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
     >
       <div
-        class="fixed inset-0 bg-gray-500/75 transition-opacity"
+        className="fixed inset-0 bg-gray-500/75 transition-opacity"
         aria-hidden="true"
       ></div>
 
-      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <div className="flex items-center">
             <svg
               aria-hidden="true"
-              class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+              className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +31,7 @@ export const Loading = () => {
                 fill="currentFill"
               />
             </svg>
-            <span class=" mx-3">Cargando...</span>
+            <span className=" mx-3">Cargando...</span>
           </div>
         </div>
       </div>

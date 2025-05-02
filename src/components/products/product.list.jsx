@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect,  } from "react";
 import { getProducts } from "../../services/productService";
-import { ProductModal } from "./product.modal";
 import { ProductSummary } from "./product.summary";
 import { handleChange } from "../../utils/handlerForm";
 import { Table } from "../element/table/table";
-import WompiButton from "../wompi/WompiButton";
+import { WompiButton } from "../wompi/WompiButton";
 import { TransactionHome } from "../transactions/transaction.home";
 import { Loading } from "../modals/loading";
 
@@ -208,7 +207,7 @@ export const ProductList = () => {
   }, []);
 
   return (
-    <div className="mx-10 px-8">
+    <div className="md:mx-10 md:px-8">
       <Table arrayProducts={arrayProducts} pay={pay} />
       {stateLoading&<Loading/>}
       {openModal && (

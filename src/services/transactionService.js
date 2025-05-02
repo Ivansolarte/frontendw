@@ -1,5 +1,3 @@
-// src/services/transactionService.js
-
 import { BASE_URL } from "../config/config";
 
 export async function createTransaction(payload) {

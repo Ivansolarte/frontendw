@@ -68,7 +68,6 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
   };
 
   const onsubmit = async () => {
-    // 1. Verificación de campos obligatorios (los campos con //formulario)
     const requiredFields = [
       { name: "customerName", label: "Nombre del Cliente" },
       { name: "customerAddress", label: "Dirección del Cliente" },
@@ -79,36 +78,33 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
       { name: "phone_number", label: "Número de teléfono" },
     ];
 
-    // Recorremos los campos obligatorios
+    //campos obligatorios
     for (let field of requiredFields) {
       const value = form[field.name];
       if (!value || value.trim() === "") {
         alert(`El campo ${field.label} es obligatorio.`);
-        return; // Detenemos el envío si algún campo está vacío
+        return;
       }
     }
 
-    // 2. Validación de los campos con restricciones (como el formato del email, CVV, etc.)
-    // Validación de Email
     const email = form.email;
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailPattern.test(email)) {
       alert("El formato del correo electrónico es incorrecto.");
-      return; // Detener el envío del formulario
+      return;
     }
 
-    // Validación de CVV (3 dígitos numéricos)
     const cvv = form.cvv;
     if (!/^\d{3}$/.test(cvv)) {
       alert("El CVV debe ser un número de 3 dígitos.");
-      return; // Detener el envío del formulario
+      return;
     }
 
-    // Validación de número de tarjeta (solo dígitos, longitud 16)
+    // número de tarjeta 16
     const cardNumber = form.cardNumber;
     if (!/^\d{16}$/.test(cardNumber)) {
       alert("El número de tarjeta debe contener 16 dígitos.");
-      return; // Detener el envío del formulario
+      return;
     }
 
     const signature = await generateSignature(form);
@@ -116,9 +112,7 @@ export const TransactionHome = ({ closeModal, dataRow }) => {
     getAcceptanceToken().then((resp) => {
       form.acceptance_token = resp.data.presigned_acceptance.acceptance_token;
       form.signature = signature;
-      console.log(form);
       createTransaction(form).then((resp) => {
-        console.log(resp);
         if (resp.data) {
           alert("transferencia exitosa");
           setStateLoading(false);

@@ -72,18 +72,17 @@
 
 // export default WompiButton;
 
-import React, { useEffect, useRef } from "react";
 
-const WompiButton = ({ amount, reference, signature }) => {
+import { useEffect, useRef } from 'react'
+
+export const WompiButton = ({ amount, reference, signature }) => {
   const formRef = useRef(null);
 
   const cleanReference = (value) => value.replace(/[^a-zA-Z0-9]/g, "");
   const cleanedRef = cleanReference(reference);
 
   useEffect(() => {
-    if (!formRef.current) return;
-
-    // Crear e insertar el script
+    if (!formRef.current) return;  
     const script = document.createElement("script");
     script.src = "https://checkout.wompi.co/widget.js";
     script.setAttribute("data-render", "button");
@@ -94,11 +93,10 @@ const WompiButton = ({ amount, reference, signature }) => {
     script.setAttribute("data-signature:integrity", signature);
     script.async = true;
 
-    formRef.current.innerHTML = ""; // Limpia por si acaso
+    formRef.current.innerHTML = ""; 
     formRef.current.appendChild(script);
   }, [amount, cleanedRef, signature]);
-
-  return <form ref={formRef}></form>;
-};
-
-export default WompiButton;
+  return (
+    <form ref={formRef}></form>
+  )
+}

@@ -8,7 +8,7 @@ export const HomeRouters = () => {
   return (
     <>
       <Header />
-      <div className="my-10">
+      <div className=" md:my-10">
         <Routes>
           <Route path="/*" element={<ProductHome />} />
           <Route path="/addProduct" element={<ProductAdd />} />

@@ -1,5 +1,3 @@
-// src/services/productService.js
-
 import { BASE_URL } from "../config/config";
 
 export async function getProducts() {

@@ -1,4 +1,3 @@
-// const BASE_URL = "https://backendw-fls8.onrender.com";
 import { BASE_URL } from "../config/config";
 
 export async function authLogin(payload) {

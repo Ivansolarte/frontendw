@@ -1,4 +1,3 @@
-// src/services/wompiService.js
 const API_BASE = "https://api-sandbox.co.uat.wompi.dev/v1";
 const PUBLIC_KEY = "pub_stagtest_g2u0HQd3ZMh05hsSgTS2lUV8t3s4mOt7";
 
